@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
   message_generation
+  vision_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -154,12 +155,20 @@ add_executable(dn_object_detect
    src/dn_object_detect.cpp
    src/MultiClassObjectDetector.cpp
 )
+
+add_executable(dn_object_detect_modified
+   src/dn_object_detect_modified.cpp
+   src/MultiClassObjectDetectorModified.cpp
+)
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(dn_object_detect ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 add_dependencies(dn_object_detect ${catkin_EXPORTED_TARGETS})
 add_dependencies(dn_object_detect ${PROJECT_NAME}_generate_messages_cpp)
+
+
+add_dependencies(dn_object_detect_modified ${catkin_EXPORTED_TARGETS})
 
 add_library(darknet_objects_detection SHARED IMPORTED)
 set_target_properties(darknet_objects_detection PROPERTIES IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/lib/libyololib.so)
@@ -170,6 +179,10 @@ target_link_libraries(dn_object_detect
    ${catkin_LIBRARIES}
 )
 
+target_link_libraries(dn_object_detect_modified
+   darknet_objects_detection
+   ${catkin_LIBRARIES}
+)
 #############
 ## Install ##
 #############

@@ -1,5 +1,5 @@
 //
-//  MultiClassObjectDetector.cpp
+//  MultiClassObjectDetectorModified.cpp
 //  pr2_perception
 //
 //  Created by Xun Wang on 12/05/16.
@@ -26,7 +26,7 @@
 #include <darknet/detection_layer.h>
 #include <darknet/region_layer.h>
 
-#include "MultiClassObjectDetector.h"
+#include "MultiClassObjectDetectorModified.h"
 
 #include "dn_object_detect/DetectedObjects.h"
 
@@ -62,7 +62,7 @@ static inline long timediff_usec( timespec start, timespec end )
     }
 }
 
-MultiClassObjectDetector::MultiClassObjectDetector() :
+MultiClassObjectDetectorModified::MultiClassObjectDetectorModified() :
     imgTrans_( priImgNode_ ),
     initialised_( false ),
     doDetection_( false ),
@@ -74,11 +74,11 @@ MultiClassObjectDetector::MultiClassObjectDetector() :
     priImgNode_.setCallbackQueue( &imgQueue_ );
 }
 
-MultiClassObjectDetector::~MultiClassObjectDetector()
+MultiClassObjectDetectorModified::~MultiClassObjectDetectorModified()
 {
 }
 
-void MultiClassObjectDetector::init()
+void MultiClassObjectDetectorModified::init()
 {
     NodeHandle priNh( "~" );
     std::string yoloModelFile;
@@ -122,20 +122,20 @@ void MultiClassObjectDetector::init()
 
     initialised_ = true;
 //    dtcPub_ = priImgNode_.advertise<dn_object_detect::DetectedObjects>( "/dn_object_detect/detected_objects", 1,
-//                                                                        boost::bind( &MultiClassObjectDetector::startDetection, this ),
-//                                                                        boost::bind( &MultiClassObjectDetector::stopDetection, this) );
+//                                                                        boost::bind( &MultiClassObjectDetectorModified::startDetection, this ),
+//                                                                        boost::bind( &MultiClassObjectDetectorModified::stopDetection, this) );
 
     //change
     dtcPub_ = priImgNode_.advertise<vision_msgs::Detection2DArray>( "/dn_object_detect/detected_objects", 1,
-                                                                        boost::bind( &MultiClassObjectDetector::startDetection, this ),
-                                                                        boost::bind( &MultiClassObjectDetector::stopDetection, this) );
+                                                                        boost::bind( &MultiClassObjectDetectorModified::startDetection, this ),
+                                                                        boost::bind( &MultiClassObjectDetectorModified::stopDetection, this) );
 
     imgPub_ = imgTrans_.advertise( "/dn_object_detect/debug_view", 1,
-                                   boost::bind( &MultiClassObjectDetector::startDebugView, this ),
-                                   boost::bind( &MultiClassObjectDetector::stopDebugView, this) );
+                                   boost::bind( &MultiClassObjectDetectorModified::startDebugView, this ),
+                                   boost::bind( &MultiClassObjectDetectorModified::stopDebugView, this) );
 }
 
-void MultiClassObjectDetector::fini()
+void MultiClassObjectDetectorModified::fini()
 {
     srvRequests_ = 1; // reset requests
     this->stopDetection();
@@ -148,12 +148,12 @@ void MultiClassObjectDetector::fini()
     initialised_ = false;
 }
 
-void MultiClassObjectDetector::continueProcessing()
+void MultiClassObjectDetectorModified::continueProcessing()
 {
     ros::spin();
 }
 
-void MultiClassObjectDetector::doObjectDetection()
+void MultiClassObjectDetectorModified::doObjectDetection()
 {
     //ros::Rate publish_rate( kPublishFreq );
     ros::Time ts;
@@ -239,7 +239,7 @@ void MultiClassObjectDetector::doObjectDetection()
     free( boxes );
 }
 
-void MultiClassObjectDetector::processingRawImages( const sensor_msgs::ImageConstPtr& msg )
+void MultiClassObjectDetectorModified::processingRawImages( const sensor_msgs::ImageConstPtr& msg )
 {
     // assume we cannot control the framerate (i.e. default 30FPS)
     boost::mutex::scoped_lock lock( mutex_, boost::try_to_lock );
@@ -250,7 +250,7 @@ void MultiClassObjectDetector::processingRawImages( const sensor_msgs::ImageCons
     }
 }
 
-void MultiClassObjectDetector::startDebugView()
+void MultiClassObjectDetectorModified::startDebugView()
 {
     if (debugRequests_ == 0)
         this->startDetection();
@@ -258,7 +258,7 @@ void MultiClassObjectDetector::startDebugView()
     debugRequests_++;
 }
 
-void MultiClassObjectDetector::stopDebugView()
+void MultiClassObjectDetectorModified::stopDebugView()
 {
     debugRequests_--;
     if (debugRequests_ <= 0)
@@ -266,7 +266,7 @@ void MultiClassObjectDetector::stopDebugView()
 
 }
 
-void MultiClassObjectDetector::startDetection()
+void MultiClassObjectDetectorModified::startDetection()
 {
     if (!initialised_) {
         ROS_ERROR( "Detector is not initialised correctly!\n" );
@@ -281,14 +281,14 @@ void MultiClassObjectDetector::startDetection()
     imgMsgPtr_.reset();
 
     image_transport::TransportHints hints( "compressed" );
-    imgSub_ = imgTrans_.subscribe( cameraDevice_, 1, &MultiClassObjectDetector::processingRawImages, this, hints );
+    imgSub_ = imgTrans_.subscribe( cameraDevice_, 1, &MultiClassObjectDetectorModified::processingRawImages, this, hints );
 
-    object_detect_thread_ = new boost::thread( &MultiClassObjectDetector::doObjectDetection, this );
+    object_detect_thread_ = new boost::thread( &MultiClassObjectDetectorModified::doObjectDetection, this );
 
     ROS_INFO( "Starting multi-class object detection service." );
 }
 
-void MultiClassObjectDetector::stopDetection()
+void MultiClassObjectDetectorModified::stopDetection()
 {
     srvRequests_--;
     if (srvRequests_ > 0)
@@ -307,7 +307,7 @@ void MultiClassObjectDetector::stopDetection()
     }
 }
 
-void MultiClassObjectDetector::publishDetectedObjects( const DetectedList & objs )
+void MultiClassObjectDetectorModified::publishDetectedObjects( const DetectedList & objs )
 {
 
     // dn_object_detect::DetectedObjects tObjMsg;
@@ -330,7 +330,7 @@ void MultiClassObjectDetector::publishDetectedObjects( const DetectedList & objs
 }
 
 
-void MultiClassObjectDetector::drawDebug( const DetectedList & objs )
+void MultiClassObjectDetectorModified::drawDebug( const DetectedList & objs )
 {
     cv::Scalar boundColour( 255, 0, 255 );
     cv::Scalar connColour( 209, 47, 27 );
@@ -365,7 +365,7 @@ void MultiClassObjectDetector::drawDebug( const DetectedList & objs )
     imgPub_.publish( cv_ptr_->toImageMsg() );
 }
 
-void MultiClassObjectDetector::consolidateDetectedObjects( const image * im, box * boxes,
+void MultiClassObjectDetectorModified::consolidateDetectedObjects( const image * im, box * boxes,
                                                            float **probs, DetectedList & objList )
 {
     //printf( "max_nofb %d, NofVoClasses %d\n", max_nofb, NofVoClasses );
@@ -433,7 +433,7 @@ void MultiClassObjectDetector::consolidateDetectedObjects( const image * im, box
     }
 }
 
-void MultiClassObjectDetector::initClassLabels( const std::string & filename )
+void MultiClassObjectDetectorModified::initClassLabels( const std::string & filename )
 {
     const boost::filesystem::path labelFilePath = filename;
     if (boost::filesystem::exists( labelFilePath )) {

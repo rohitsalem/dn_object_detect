@@ -126,11 +126,11 @@ void MultiClassObjectDetectorModified::init()
 //                                                                        boost::bind( &MultiClassObjectDetectorModified::stopDetection, this) );
 
     //change
-    dtcPub_ = priImgNode_.advertise<vision_msgs::Detection2DArray>( "/dn_object_detect/detected_objects", 1,
+    dtcPub_ = priImgNode_.advertise<vision_msgs::Detection2DArray>( "/dn_object_detect_modified/detected_objects", 1,
                                                                         boost::bind( &MultiClassObjectDetectorModified::startDetection, this ),
                                                                         boost::bind( &MultiClassObjectDetectorModified::stopDetection, this) );
 
-    imgPub_ = imgTrans_.advertise( "/dn_object_detect/debug_view", 1,
+    imgPub_ = imgTrans_.advertise( "/dn_object_detect_modified/debug_view", 1,
                                    boost::bind( &MultiClassObjectDetectorModified::startDebugView, this ),
                                    boost::bind( &MultiClassObjectDetectorModified::stopDebugView, this) );
 }
@@ -353,11 +353,13 @@ void MultiClassObjectDetectorModified::drawDebug( const DetectedList & objs )
 
         //change
         vision_msgs::Detection2D obj=objs[i];
-        vision_msgs::ObjectHypothesisWithPose objectClass = obj.results[1];
+        vision_msgs::ObjectHypothesisWithPose objectClass = obj.results[0];
         int id= objectClass.id;
-        string objectClassName = classLabels_[id];
+        std::string objectClassName = classLabels_[id];
         cv::rectangle(cv_ptr_->image, cv::Rect(obj.bbox.x,obj.bbox.y,obj.bbox.width,obj.bbox.height),boundColour,2);
-        std::string box_text = format( "%s prob=%.2f", objectClassName.c_str() , objectClass.score);
+        //std::string box_text = format( "%s prob=%.2f", id , objectClass.score);
+        std::string box_text = objectClassName;
+
         cv::Point2i txpos( std::max (obj.bbox.x-10,0),std::max (obj.bbox.y-10,0));
         putText(cv_ptr_->image, box_text,txpos,FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
 

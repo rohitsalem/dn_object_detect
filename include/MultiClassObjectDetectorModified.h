@@ -27,10 +27,10 @@
 
 //change
 //new vision proposal messages
-#include <vision_msgs/BoundingRect.h>
+#include <vision_msgs/BoundingBox2D.h>
 #include <vision_msgs/Detection2D.h>
-#include<vision_msgs/Detection2DArray.h>
-#include<vision_msgs/ObjectHypothesis.h>
+#include <vision_msgs/Detection2DArray.h>
+#include <vision_msgs/ObjectHypothesis.h>
 
 using namespace std;
 using namespace ros;
@@ -47,7 +47,7 @@ class MultiClassObjectDetectorModified
 public:
   MultiClassObjectDetectorModified();
   virtual ~MultiClassObjectDetectorModified();
-  
+
   void init();
   void fini();
 
@@ -58,7 +58,7 @@ private:
   image_transport::ImageTransport imgTrans_;
   image_transport::Publisher imgPub_;
   image_transport::Subscriber imgSub_;
-  
+
   Publisher dtcPub_;
 
   bool doDetection_;
@@ -70,19 +70,19 @@ private:
 
   boost::mutex mutex_;
   boost::condition_variable imageCon_;
-  
+
   boost::thread * object_detect_thread_;
-  
+
   sensor_msgs::ImageConstPtr imgMsgPtr_;
 
   std::string cameraDevice_;
 
   CallbackQueue imgQueue_;
-  
+
   AsyncSpinner * procThread_;
-  
+
   cv_bridge::CvImagePtr cv_ptr_;
-  
+
   std::vector<std::string> classLabels_;
   int nofClasses_;
 
@@ -106,7 +106,7 @@ private:
   void drawDebug( const DetectedList & objs );
   void initClassLabels( const std::string & filename );
 };
-  
+
 } // namespace uts_perp
 
 #endif /* defined(__pr2_perception__MultiClassObjectDetector__) */

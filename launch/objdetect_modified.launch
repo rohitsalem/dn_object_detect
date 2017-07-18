@@ -8,4 +8,7 @@
     <param name="class_names" type="str" value="$(find dn_object_detect)/data/coco.names"/>
     <param name="threshold" type="double" value="0.4"/>
   </node>
+  <node pkg ="rviz" type="rviz" name="rviz" output="screen">
+  </node>
+  <!--node pkg="usb_cam" type="usb_cam_node" name="usb_cam_node" output="screen" /-->  	
 </launch>

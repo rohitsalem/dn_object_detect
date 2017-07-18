@@ -37,7 +37,7 @@ using namespace std;
 using namespace cv;
 
 static const int kPublishFreq = 10; // darknet can work reasonably around 5FPS
-static const string kDefaultDevice = "/wide_stereo/right/image_rect_color";
+static const string kDefaultDevice = "/usb_cam/image_raw";
 static const string kYOLOModel = "data/yolo.weights";
 static const string kYOLOConfig = "data/yolo.cfg";
 static const string kClassNamesConfig = "data/voc.names";
@@ -356,11 +356,11 @@ void MultiClassObjectDetectorModified::drawDebug( const DetectedList & objs )
         vision_msgs::ObjectHypothesisWithPose objectClass = obj.results[0];
         int id= objectClass.id;
         std::string objectClassName = classLabels_[id];
-        cv::rectangle(cv_ptr_->image, cv::Rect(obj.bbox.x,obj.bbox.y,obj.bbox.width,obj.bbox.height),boundColour,2);
+        cv::rectangle(cv_ptr_->image, cv::Rect(obj.bbox.center.x,obj.bbox.center.y,obj.bbox.size_x,obj.bbox.size_y),boundColour,2);
         //std::string box_text = format( "%s prob=%.2f", id , objectClass.score);
         std::string box_text = objectClassName;
 
-        cv::Point2i txpos( std::max (obj.bbox.x-10,0),std::max (obj.bbox.y-10,0));
+        cv::Point2i txpos( std::max (int(obj.bbox.center.x-10),0),std::max (int(obj.bbox.center.y)-10,0));
         putText(cv_ptr_->image, box_text,txpos,FONT_HERSHEY_PLAIN, 1.0, CV_RGB(0,255,0), 2.0);
 
     }
@@ -390,7 +390,7 @@ void MultiClassObjectDetectorModified::consolidateDetectedObjects( const image *
             //change
             vision_msgs::Detection2D newObj;
             vision_msgs::ObjectHypothesisWithPose objectType;
-            vision_msgs::BoundingRect objectBB;
+            vision_msgs::BoundingBox2D objectBB;
             objectType.id=objclass; //ID of the object
             objectType.score=prob; //probability of the object
             newObj.results.push_back(objectType);
@@ -422,10 +422,10 @@ void MultiClassObjectDetectorModified::consolidateDetectedObjects( const image *
             //      newObj.height = bot - newObj.tl_y;
 
             //change
-            objectBB.x= left < 0 ? 0 : left;
-            objectBB.y= top < 0 ? 0 : top;
-            objectBB.width= right - objectBB.x;
-            objectBB.height = bot - objectBB.y;
+            objectBB.center.x= left < 0 ? 0 : left;
+            objectBB.center.y= top < 0 ? 0 : top;
+            objectBB.size_x= right - objectBB.center.x;
+            objectBB.size_y = bot - objectBB.center.y;
             newObj.bbox= objectBB;
 
             objList.push_back( newObj );
